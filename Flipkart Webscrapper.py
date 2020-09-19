@@ -3,16 +3,17 @@ import pandas as pd
 from selenium.webdriver.common.keys import Keys
 from selenium import webdriver
 
-text = input("Enter product name :")
+text = input("Enter product name: ")
+number = int(input("Enter number of pages to scan: "))
 # Chrome Driver config
-# options = webdriver.ChromeOptions()
-# options.add_argument('--ignore-certificate-errors')
-# options.add_argument('--incognito')
-# options.add_argument("--test-type")
-# options.add_argument('--headless')
-# options.add_argument('--silent')
-# driver = webdriver.Chrome(".\chromedriver.exe", options=options)
-driver = webdriver.Chrome(".\chromedriver.exe")
+options = webdriver.ChromeOptions()
+options.add_argument('--ignore-certificate-errors')
+options.add_argument('--incognito')
+options.add_argument("--test-type")
+options.add_argument('--headless')
+options.add_argument('--silent')
+driver = webdriver.Chrome(".\chromedriver.exe", options=options)
+# driver = webdriver.Chrome(".\chromedriver.exe")
 
 
 titles = []
@@ -37,7 +38,7 @@ def formatDiscount(discount):
 
 url = "https://www.flipkart.com/"
 driver.get(url)
-time.sleep(2)
+# time.sleep(2)
 
 # To close login model
 driver.find_element_by_css_selector("._2AkmmA._29YdH8").click()
@@ -48,14 +49,13 @@ searchText = driver.find_element_by_class_name(
 searchText.send_keys(text)
 searchText.send_keys(Keys.ENTER)
 
-time.sleep(3)
+# time.sleep(3)
 
-n = 2
-pageCount = n-1
-while pageCount > 0:
-    # print("Page Number:", 3-pageCount)
-    page = driver.find_elements_by_css_selector("._3liAhj")
-    if page:
+pageCount = number-1
+page = driver.find_elements_by_css_selector("._3liAhj")
+
+if page:
+    while pageCount > 0:
         for item in page:
             print("*", end=" ")
             title = item.find_element_by_css_selector(
@@ -81,8 +81,14 @@ while pageCount > 0:
             ratings.append(rating)
             discounts.append(discount)
             links.append(link)
-    else:
-        page = driver.find_elements_by_css_selector("._1UoZlX")
+        pageCount -= 1
+        link = (driver.current_url).split("&page=")[0]
+        driver.get(link + "&page=" + str(number-pageCount))
+        page = driver.find_elements_by_css_selector("._3liAhj")
+        time.sleep(2)
+else:
+    page = driver.find_elements_by_css_selector("._1UoZlX")
+    while pageCount > 0:
         for item in page:
             print("*", end=" ")
             link = item.find_element_by_css_selector(
@@ -108,10 +114,11 @@ while pageCount > 0:
             discounts.append(discount)
             links.append(link)
 
-    pageCount -= 1
-    link = (driver.current_url).split("&page=")[0]
-    driver.get(link + "&page=" + str(n-pageCount))
-    time.sleep(3)
+        pageCount -= 1
+        link = (driver.current_url).split("&page=")[0]
+        driver.get(link + "&page=" + str(number-pageCount))
+        page = driver.find_elements_by_css_selector("._1UoZlX")
+        time.sleep(2)
 print()
 
 
